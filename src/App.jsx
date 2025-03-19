@@ -1,9 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
+import Hero from './components/custom/Hero'
 
-export default function App() {
+function App() {
+  const [count, setCount] = useState(0)
+
   return (
-    <div>
-      <p className='text-black text-4xl'>sagar </p>
-    </div>
+   <>
+   {/*hero */}
+   <Hero/>
+
+
+   </>
   )
 }
+
+export default App
