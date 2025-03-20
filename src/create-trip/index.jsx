@@ -7,9 +7,9 @@ const CreateTrip = () => {
   const [place, setPlace] = useState(null);
   const [formData, setFormData] = useState({});
 
-  // Function to update form data
+  // to update form data
   const handleInputChange = (name, value) => {
-    if (name === 'noOfDays' && (value < 1 || value > 7)) {
+    if (name === 'noOfDays' && (value < 1 || value > 7)) { // min ani max value define gare day select garda 
       toast("Please enter a trip duration between 1 and 7 days.");
       return;
     }
