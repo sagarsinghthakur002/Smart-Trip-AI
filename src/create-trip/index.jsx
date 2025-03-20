@@ -1,28 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
-import { selectBudgetOptions, selectTravelsList } from '../constants/options.jsx';
+import { AI_PROMPT, selectBudgetOptions, selectTravelsList } from '../constants/options.jsx';
+import { toast, Toaster } from "sonner";
 
 const CreateTrip = () => {
   const [place, setPlace] = useState(null);
   const [formData, setFormData] = useState({});
 
+  // Function to update form data
   const handleInputChange = (name, value) => {
-    if (name === 'noOfDays' && value > 7) {
-      console.log('Please enter Trip Days less than 7');
+    if (name === 'noOfDays' && (value < 1 || value > 7)) {
+      toast("Please enter a trip duration between 1 and 7 days.");
       return;
     }
 
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value
-    });
+    }));
   };
-
-  
 
   useEffect(() => {
     console.log(formData);
   }, [formData]);
+
+
+
+  {/* Gamini AI prompt  */} 
+
+  const OnGenerateTrip = () => { // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
+    if (!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays) {
+      toast("Please fill in all details correctly.");
+      return;
+    }
+
+    const FINAL_PROMPT = AI_PROMPT // provied gare ko prompt ko value each selection ma change garna lai
+      .replace('{location}', formData?.location)
+      .replace('{totalDays}', formData?.noOfDays)
+      .replace('{traveler}', formData?.traveler)
+      .replace('{budget}', formData?.budget);
+
+    console.log(FINAL_PROMPT);
+  };
 
   return (
     <div className='sm:px-10 md:px-32 lg:px-56 px-10 mt-10'>
@@ -32,7 +51,9 @@ const CreateTrip = () => {
       </p>
 
       <div className='mt-20 flex flex-col gap-10'>
-        {/* Destination Selection */}
+
+
+        {/* google place API , place selection ko lagi  */}
         <div>
           <h2 className='text-xl my-3 font-medium'>What is your destination of choice?</h2>
           <GooglePlacesAutocomplete
@@ -41,7 +62,7 @@ const CreateTrip = () => {
               place,
               onChange: (v) => {
                 setPlace(v);
-                handleInputChange('destination', v.label);
+                handleInputChange('location', v.label); 
               },
               styles: {
                 input: (provided) => ({ ...provided, color: 'black' }),
@@ -52,6 +73,7 @@ const CreateTrip = () => {
           />
         </div>
 
+
         {/* Trip Duration */}
         <div>
           <h2 className='text-xl my-3 font-medium'>How many days are you planning for your trip?</h2>
@@ -59,9 +81,13 @@ const CreateTrip = () => {
             type='number'
             placeholder={'Ex. 3'}
             className="border p-2 rounded-md w-full"
-            onChange={(e) => handleInputChange('noOfDays',e.target.value)}
+            min="1" 
+            max="7" 
+            onChange={(e) => handleInputChange('noOfDays', Number(e.target.value))}
+            value={formData?.noOfDays || ""}
           />
         </div>
+
 
         {/* Budget Selection */}
         <div>
@@ -82,6 +108,7 @@ const CreateTrip = () => {
           </div>
         </div>
 
+
         {/* Travel Companion Selection */}
         <div>
           <h2 className='text-xl my-3 font-medium'>Who do you plan on traveling with on your next adventure?</h2>
@@ -101,11 +128,15 @@ const CreateTrip = () => {
           </div>
         </div>
 
+
         {/* Generate Trip Button */}
         <div className='flex justify-end mt-10'>
           <button
-            className="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition"
-            
+            // className={`px-6 py-3 rounded-md shadow-md transition
+            //   ${!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays ?
+            //   'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+            onClick={OnGenerateTrip}
+            disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
           >
             Generate Trip
           </button>
