@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { AI_PROMPT, selectBudgetOptions, selectTravelsList } from '../constants/options.jsx';
 import { toast, Toaster } from "sonner";
+import { chatSession } from '../service/AiModel.jsx'
 
 const CreateTrip = () => {
   const [place, setPlace] = useState(null);
@@ -28,7 +29,7 @@ const CreateTrip = () => {
 
   {/* Gamini AI prompt  */} 
 
-  const OnGenerateTrip = () => { // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
+  const OnGenerateTrip = async() => { // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
     if (!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays) {
       toast("Please fill in all details correctly.");
       return;
@@ -41,6 +42,9 @@ const CreateTrip = () => {
       .replace('{budget}', formData?.budget);
 
     console.log(FINAL_PROMPT);
+
+    const result=await chatSession.sendMessage(FINAL_PROMPT); // sending final prompt to AI to get result
+    console.log(result?.response?.text()); 
   };
 
   return (
@@ -132,9 +136,6 @@ const CreateTrip = () => {
         {/* Generate Trip Button */}
         <div className='flex justify-end mt-10'>
           <button
-            // className={`px-6 py-3 rounded-md shadow-md transition
-            //   ${!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays ?
-            //   'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
             onClick={OnGenerateTrip}
             disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
           >
