@@ -5,13 +5,14 @@ import { toast, Toaster } from "sonner";
 import { chatSession } from '../service/AiModel.jsx'
 
 const CreateTrip = () => {
-  const [place, setPlace] = useState(null);
+  const [place, setPlace] = useState();
   const [formData, setFormData] = useState({});
+  // const [openDialog, setOpenDialog] = useState(false);
 
   // to update form data
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (name, value) => { 
     if (name === 'noOfDays' && (value < 1 || value > 7)) { // min ani max value define gare day select garda 
-      toast("Please enter a trip duration between 1 and 7 days.");
+      toast("Please enter a trip duration between 1 and 7 days."); //pop-up info
       return;
     }
 
@@ -25,13 +26,11 @@ const CreateTrip = () => {
     console.log(formData);
   }, [formData]);
 
+  // Gamini AI prompt
+  const OnGenerateTrip = async () => {  // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
 
-
-  {/* Gamini AI prompt  */} 
-
-  const OnGenerateTrip = async() => { // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
-    if (!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays) {
-      toast("Please fill in all details correctly.");
+    if (!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays == null) {
+      toast("Please fill in all details correctly."); // pop-up for checking if all fields are filled
       return;
     }
 
@@ -43,8 +42,10 @@ const CreateTrip = () => {
 
     console.log(FINAL_PROMPT);
 
-    const result=await chatSession.sendMessage(FINAL_PROMPT); // sending final prompt to AI to get result
+    const result = await chatSession.sendMessage(FINAL_PROMPT); // sending final prompt to AI to get result
     console.log(result?.response?.text()); 
+
+    toast("Event has been created.");
   };
 
   return (
@@ -56,8 +57,7 @@ const CreateTrip = () => {
 
       <div className='mt-20 flex flex-col gap-10'>
 
-
-        {/* google place API , place selection ko lagi  */}
+        {/* Google Place API for place selection */}
         <div>
           <h2 className='text-xl my-3 font-medium'>What is your destination of choice?</h2>
           <GooglePlacesAutocomplete
@@ -77,7 +77,6 @@ const CreateTrip = () => {
           />
         </div>
 
-
         {/* Trip Duration */}
         <div>
           <h2 className='text-xl my-3 font-medium'>How many days are you planning for your trip?</h2>
@@ -91,7 +90,6 @@ const CreateTrip = () => {
             value={formData?.noOfDays || ""}
           />
         </div>
-
 
         {/* Budget Selection */}
         <div>
@@ -112,7 +110,6 @@ const CreateTrip = () => {
           </div>
         </div>
 
-
         {/* Travel Companion Selection */}
         <div>
           <h2 className='text-xl my-3 font-medium'>Who do you plan on traveling with on your next adventure?</h2>
@@ -132,12 +129,12 @@ const CreateTrip = () => {
           </div>
         </div>
 
-
         {/* Generate Trip Button */}
         <div className='flex justify-end mt-10'>
           <button
             onClick={OnGenerateTrip}
-            disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
+            // disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
           >
             Generate Trip
           </button>
