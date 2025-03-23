@@ -3,14 +3,16 @@ import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { AI_PROMPT, selectBudgetOptions, selectTravelsList } from '../constants/options.jsx';
 import { toast, Toaster } from "sonner";
 import { chatSession } from '../service/AiModel.jsx'
+import { DialogDescription, DialogHeader } from "../../components/custom/Dialog.jsx";
+
 
 const CreateTrip = () => {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState({});
-  // const [openDialog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
   // to update form data
-  const handleInputChange = (name, value) => { 
+  const handleInputChange = (name, value) => {
     if (name === 'noOfDays' && (value < 1 || value > 7)) { // min ani max value define gare day select garda 
       toast("Please enter a trip duration between 1 and 7 days."); //pop-up info
       return;
@@ -27,7 +29,19 @@ const CreateTrip = () => {
   }, [formData]);
 
   // Gamini AI prompt
-  const OnGenerateTrip = async () => {  // pop-up ko lagii sab fill-up gare xa ki nai check garna ko lagi 
+  const OnGenerateTrip = async () => {
+
+    const user = localStorage.getItem('user');
+
+    if (!user) {
+      setOpenDialog(true)
+      return;
+    }
+
+
+
+
+
 
     if (!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays == null) {
       toast("Please fill in all details correctly."); // pop-up for checking if all fields are filled
@@ -43,7 +57,7 @@ const CreateTrip = () => {
     console.log(FINAL_PROMPT);
 
     const result = await chatSession.sendMessage(FINAL_PROMPT); // sending final prompt to AI to get result
-    console.log(result?.response?.text()); 
+    console.log(result?.response?.text());
 
     toast("Event has been created.");
   };
@@ -66,7 +80,7 @@ const CreateTrip = () => {
               place,
               onChange: (v) => {
                 setPlace(v);
-                handleInputChange('location', v.label); 
+                handleInputChange('location', v.label);
               },
               styles: {
                 input: (provided) => ({ ...provided, color: 'black' }),
@@ -84,8 +98,8 @@ const CreateTrip = () => {
             type='number'
             placeholder={'Ex. 3'}
             className="border p-2 rounded-md w-full"
-            min="1" 
-            max="7" 
+            min="1"
+            max="7"
             onChange={(e) => handleInputChange('noOfDays', Number(e.target.value))}
             value={formData?.noOfDays || ""}
           />
@@ -133,12 +147,26 @@ const CreateTrip = () => {
         <div className='flex justify-end mt-10'>
           <button
             onClick={OnGenerateTrip}
-            // disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
+            disabled={!formData?.location || !formData?.budget || !formData?.traveler || !formData?.noOfDays}
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
           >
             Generate Trip
           </button>
         </div>
+
+        <Dialog open={openDialog} >  
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                <img src='/assest/images/planner.png'></img>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
+
+
       </div>
     </div>
   );
